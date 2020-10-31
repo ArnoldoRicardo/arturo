@@ -2,18 +2,35 @@ from django.db import models
 from django.utils import timezone
 
 
-class Venta(models.Model):
-    Cliente = models.ForeignKey('Cliente', null=True, on_delete=models.SET_NULL)
-    No_nota = models.IntegerField()
-    Producto = models.ForeignKey('Producto', null=True, on_delete=models.SET_NULL)
-    Descripcion = models.TextField()
-    Cantidad = models.FloatField()
-    Total = models.FloatField()
-    Abono = models.FloatField()
+class Configuracion(models.Model):
+    nombre = models.CharField(max_length=32)
+    folio_inicial = models.IntegerField()
+
+
+class Nota(models.Model):
+    no_nota = models.IntegerField()
+    cliente = models.ForeignKey('Cliente', null=True, on_delete=models.SET_NULL)
+    total = models.FloatField()
+    anticipo = models.FloatField()
     fecha = models.DateTimeField(default=timezone.now)
+    entregado = models.BooleanField(default=False)
 
     def __str__(self):
-        return '%s' % (self.No_nota,)
+        return '%s' % (self.no_nota)
+
+
+class Venta(models.Model):
+    nota = models.ForeignKey('Nota', null=True, on_delete=models.SET_NULL)
+    producto = models.ForeignKey('Producto', null=True, on_delete=models.SET_NULL)
+    descripcion = models.TextField()
+    cantidad = models.FloatField()
+    total = models.FloatField()
+    impreso = models.BooleanField(default=False)
+    diseñado = models.BooleanField(default=False)
+    fecha_entrega = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return '[%s] %s $%s' % (self.cantidad, self.producto.nombre, self.total)
 
 
 class Cliente(models.Model):
@@ -30,7 +47,7 @@ class Producto(models.Model):
     area = models.ForeignKey('Area', null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
-        return '%s - %s' % (self.nombre,self.area)
+        return '%s - %s' % (self.nombre, self.area)
 
 
 class Area(models.Model):
